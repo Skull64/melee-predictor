@@ -1,11 +1,13 @@
 #include <chrono>
 #include <string>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <vector>
 
 #include "Bracket.hpp"
 
 int main(int argc, char **argv) {
-  int n = 1e6;  // Number of simulations
+  int n = 1e5;  // Number of simulations
 
   int num_W = 32;  // Number of players in winners bracket
   int num_L = 32;  // Number of players in losers bracket
@@ -52,18 +54,22 @@ int main(int argc, char **argv) {
   std::chrono::high_resolution_clock::time_point start, end;
 
   // Simulate the bracket n times
+  struct winsize console_size;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &console_size);
+  int pbarWidth = console_size.ws_col - 8;
   start = std::chrono::high_resolution_clock::now();
   for (int i = 0; i < n; i++) {
     bracket->simulate(true);
-    if (n > 100 && i%(n / 100) == 0) {
-      std::cout << (i * 100 / n) << " ";
+    if (n > pbarWidth && i%(n / pbarWidth) == 0) {
+      int pos = i * pbarWidth / n;
+      int pct = i * 100 / n;
+      std::cout << "[" << std::string(pos, '=') << ">" <<
+                   std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
       std::cout.flush();
     }
   }
-  if (n > 100) {
-    std::cout << 100 << std::endl;
-    std::cout.flush();
-  }
+  std::cout << "[" << std::string(pbarWidth, '=') << "] 100%" << std::endl;
+  std::cout << std::endl;
   end = std::chrono::high_resolution_clock::now();
 
   // Print results
