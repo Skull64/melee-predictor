@@ -16,8 +16,10 @@ float square(float x) {
 
 // Take an int to the power of another int
 int int_power(int x, int n) {
-  if (x == 0) return 0;
-  if (n <= 0) return 1;
+  if (x == 0)
+    return 0;
+  if (n <= 0)
+    return 1;
   int y = 1;
   while (n > 1) {
     if (n % 2 == 0) {
@@ -56,7 +58,7 @@ void Player::calc_avg_points() {
   int t = 0;
   float p = 100.;
   for (int i = 0; i < 12; i++) {
-    avg_points += placings[i]*p;
+    avg_points += placings[i] * p;
     t += placings[i];
     p *= 0.75;
   }
@@ -70,7 +72,7 @@ playerLibrary load_player_data() {
   std::string name;
   float rating_orig, RD_orig;
   while (infile >> name >> rating_orig >> RD_orig) {
-    Player *player = new Player(name, rating_orig, RD_orig);
+    Player* player = new Player(name, rating_orig, RD_orig);
     players.insert(std::pair<std::string, Player*>(name, player));
   }
   return players;
@@ -92,7 +94,7 @@ Match::Match(std::string nam, char sid, int rid, int i) {
 }
 
 // Set the structure of a match; i.e. where the winner and loser go next
-void Match::set_structure(Match *wt, int wti, Match *lt, int lti) {
+void Match::set_structure(Match* wt, int wti, Match* lt, int lti) {
   winner_to = wt;
   loser_to = lt;
   wt_index = wti;
@@ -100,7 +102,7 @@ void Match::set_structure(Match *wt, int wti, Match *lt, int lti) {
 }
 
 // Set the players taking place in a match
-void Match::set_players(Player *p1, Player *p2) {
+void Match::set_players(Player* p1, Player* p2) {
   player_1 = p1;
   player_2 = p2;
 }
@@ -117,10 +119,12 @@ void Match::simulate(bool update_ratings) {
   if (result == 0) {
     dif = player_1->rating - player_2->rating;
     RD = sqrt(player_1->RD * player_1->RD + player_2->RD * player_2->RD);
-    g = 1./sqrt(1. + 3. * square(q * RD / pi));
-    E = 1./(1. + pow(10., -g * dif / 400.));
-    if (E > rand_float()) result = 1;  // Player 1 wins
-    else result = 2;  // Player 2 wins
+    g = 1. / sqrt(1. + 3. * square(q * RD / pi));
+    E = 1. / (1. + pow(10., -g * dif / 400.));
+    if (E > rand_float())
+      result = 1;  // Player 1 wins
+    else
+      result = 2;  // Player 2 wins
   }
 
   if (result == 1) {  // Player 1 has won
@@ -141,22 +145,26 @@ void Match::simulate(bool update_ratings) {
   /* if (side == 'G' && round_id == 1) {
     // Put something here
   } else */ {
-    if (wt_index == 0) winner_to->player_1 = winner;
-    else winner_to->player_2 = winner;
-    if (lt_index == 0) loser_to->player_1 = loser;
-    else loser_to->player_2 = loser;
+    if (wt_index == 0)
+      winner_to->player_1 = winner;
+    else
+      winner_to->player_2 = winner;
+    if (lt_index == 0)
+      loser_to->player_1 = loser;
+    else
+      loser_to->player_2 = loser;
   }
 
   // Update rating and RD
   if (update_ratings) {
     float g1, g2, E1, E2, x1, x2, y1, y2;
     dif = player_1->rating - player_2->rating;
-    g1 = 1./sqrt(1. + 3. * square(q * player_1->RD / pi));
-    g2 = 1./sqrt(1. + 3. * square(q * player_2->RD / pi));
-    E1 = 1./(1. + pow(10., -g2 * dif / 400.));
-    E2 = 1./(1. + pow(10.,  g1 * dif / 400.));
-    x1 = 1./(square(player_1->RD));
-    x2 = 1./(square(player_2->RD));
+    g1 = 1. / sqrt(1. + 3. * square(q * player_1->RD / pi));
+    g2 = 1. / sqrt(1. + 3. * square(q * player_2->RD / pi));
+    E1 = 1. / (1. + pow(10., -g2 * dif / 400.));
+    E2 = 1. / (1. + pow(10.,  g1 * dif / 400.));
+    x1 = 1. / (square(player_1->RD));
+    x2 = 1. / (square(player_2->RD));
     y1 = qs * square(g2) * E1 * (1. - E1);  // 1/(d^2)
     y2 = qs * square(g1) * E2 * (1. - E2);  // 1/(d^2)
     player_1->RD = std::max(30., sqrt(1. / (x1 + y1)));
@@ -174,47 +182,73 @@ Round::Round(char sid, int rid) {
 
   if (side == 'W') {
     num_matches = int_power(2, round_id);
-    if      (round_id == 0) name = "Winners Finals";
-    else if (round_id == 1) name = "Winners Semis";
-    else if (round_id == 2) name = "Winners Quarters";
-    else name = "Winners Top " + std::to_string(3 * int_power(2, round_id));
+    if (round_id == 0)
+      name = "Winners Finals";
+    else if (round_id == 1)
+      name = "Winners Semis";
+    else if (round_id == 2)
+      name = "Winners Quarters";
+    else
+      name = "Winners Top " + std::to_string(3 * int_power(2, round_id));
   } else if (side == 'L') {
-    num_matches = int_power(2, round_id/2);
-    if      (round_id == 0) name = "Losers Finals";
-    else if (round_id == 1) name = "Losers Semis";
-    else if (round_id == 2) name = "Losers Quarters";
-    else name = "Losers Top " +
-        std::to_string((round_id%2 + 3) * int_power(2, (round_id/2)));
+    num_matches = int_power(2, round_id / 2);
+    if (round_id == 0)
+      name = "Losers Finals";
+    else if (round_id == 1)
+      name = "Losers Semis";
+    else if (round_id == 2)
+      name = "Losers Quarters";
+    else
+      name = "Losers Top " +
+             std::to_string((round_id % 2 + 3) * int_power(2, (round_id / 2)));
   } else if (side == 'G') {
     num_matches = 1;
-    if      (round_id == 0) name = "Grand Finals S2";
-    else if (round_id == 1) name = "Grand Finals";
-    else name = "";
+    if (round_id == 0)
+      name = "Grand Finals S2";
+    else if (round_id == 1)
+      name = "Grand Finals";
+    else
+      name = "";
   } else if (side == 'P') {
-    if (round_id < 6) num_matches = 1;
-    else num_matches = int_power(2, round_id/2 - 2);
-    if      (round_id ==  0) name = "1st Place";
-    else if (round_id ==  1) name = "2nd Place";
-    else if (round_id ==  2) name = "3rd Place";
-    else if (round_id ==  3) name = "4th Place";
-    else if (round_id ==  4) name = "5th-6th Place";
-    else if (round_id ==  5) name = "7th-8th Place";
-    else if (round_id ==  6) name = "9th-12th Place";
-    else if (round_id ==  7) name = "13th-16th Place";
-    else if (round_id ==  8) name = "17th-24th Place";
-    else if (round_id ==  9) name = "25th-32nd Place";
-    else if (round_id == 10) name = "33rd-48th Place";
-    else if (round_id == 11) name = "49th-64th Place";
+    if (round_id < 6)
+      num_matches = 1;
+    else
+      num_matches = int_power(2, round_id / 2 - 2);
+    if (round_id ==  0)
+      name = "1st Place";
+    else if (round_id ==  1)
+      name = "2nd Place";
+    else if (round_id ==  2)
+      name = "3rd Place";
+    else if (round_id ==  3)
+      name = "4th Place";
+    else if (round_id ==  4)
+      name = "5th-6th Place";
+    else if (round_id ==  5)
+      name = "7th-8th Place";
+    else if (round_id ==  6)
+      name = "9th-12th Place";
+    else if (round_id ==  7)
+      name = "13th-16th Place";
+    else if (round_id ==  8)
+      name = "17th-24th Place";
+    else if (round_id ==  9)
+      name = "25th-32nd Place";
+    else if (round_id == 10)
+      name = "33rd-48th Place";
+    else if (round_id == 11)
+      name = "49th-64th Place";
     //else if (round_id == 12) name = "65th-96th Place";
     //else if (round_id == 13) name = "97th-128th Place";
     //else if (round_id == 14) name = "129th-192nd Place";
     //else if (round_id == 15) name = "193rd-256th Place";
-    else name = "";
+    else
+      name = "";
   }
 
   // Create match objects
   for (int i = 0; i < num_matches; i++) {
-    Match *match = new Match(name, side, round_id, i);
+    Match* match = new Match(name, side, round_id, i);
     matches.push_back(match);
   }
 }
@@ -248,19 +282,19 @@ Bracket::Bracket(int num_W, int num_L) {
 
   // Create round objects
   for (int i = 0; i < num_rounds_W; i++) {
-    Round *round = new Round('W', i);
+    Round* round = new Round('W', i);
     winners.push_back(round);
   }
   for (int i = 0; i < num_rounds_L; i++) {
-    Round *round = new Round('L', i);
+    Round* round = new Round('L', i);
     losers.push_back(round);
   }
   for (int i = 0; i < num_rounds_G; i++) {
-    Round *round = new Round('G', i);
+    Round* round = new Round('G', i);
     grands.push_back(round);
   }
   for (int i = 0; i < num_rounds_P; i++) {
-    Round *round = new Round('P', i);
+    Round* round = new Round('P', i);
     placings.push_back(round);
   }
 }
@@ -280,8 +314,8 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
   // Other winners bracket
   for (int rid = 1; rid < num_rounds_W; rid++) {
     for (int i = 0; i < winners[rid]->num_matches; i++) {
-      winners[rid]->matches[i]->set_structure(winners[rid-1]->matches[i/2], i%2,
-                                   losers[rid*2]->matches[wl_map[rid-1][i]], 0);
+      winners[rid]->matches[i]->set_structure(winners[rid - 1]->matches[i / 2], i % 2,
+                                              losers[rid * 2]->matches[wl_map[rid - 1][i]], 0);
     }
   }
 
@@ -292,16 +326,16 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
   // Losers bracket: no players came directly from winners
   for (int rid = 1; rid < num_rounds_L; rid += 2) {
     for (int i = 0; i < losers[rid]->num_matches; i++) {
-      losers[rid]->matches[i]->set_structure(losers[rid-1]->matches[i], 1,
-                                             placings[rid+2]->matches[i/2], i%2);
+      losers[rid]->matches[i]->set_structure(losers[rid - 1]->matches[i], 1,
+                                             placings[rid + 2]->matches[i / 2], i % 2);
     }
   }
 
   // Losers bracket: half the players came directly from winners
   for (int rid = 2; rid < num_rounds_L; rid += 2) {
     for (int i = 0; i < losers[rid]->num_matches; i++) {
-      losers[rid]->matches[i]->set_structure(losers[rid-1]->matches[i/2], i%2,
-                                             placings[rid+2]->matches[i/2], i%2);
+      losers[rid]->matches[i]->set_structure(losers[rid - 1]->matches[i / 2], i % 2,
+                                             placings[rid + 2]->matches[i / 2], i % 2);
     }
   }
 
@@ -323,16 +357,17 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
 std::vector<Player*> Bracket::set_initial_players() {
   std::ifstream file("initial_bracket.txt");
   std::string name;
-  Player *player_1, *player_2;
+  Player* player_1, *player_2;
   std::vector<Player*> players_in_bracket;
   int i = 0;
   while (std::getline(file, name)) {
-    if (name.empty()) break;
-    if (i%2 == 0) {
+    if (name.empty())
+      break;
+    if (i % 2 == 0) {
       player_1 = player_library.find(name)->second;
     } else {
       player_2 = player_library.find(name)->second;
-      winners.back()->matches[i/2]->set_players(player_1, player_2);
+      winners.back()->matches[i / 2]->set_players(player_1, player_2);
       players_in_bracket.push_back(player_1);
       players_in_bracket.push_back(player_2);
     }
@@ -340,12 +375,13 @@ std::vector<Player*> Bracket::set_initial_players() {
   }
   i = 0;
   while (std::getline(file, name)) {
-    if (name.empty()) break;
-    if (i%2 == 0) {
+    if (name.empty())
+      break;
+    if (i % 2 == 0) {
       player_1 = player_library.find(name)->second;
     } else {
       player_2 = player_library.find(name)->second;
-      losers.back()->matches[i/2]->set_players(player_1, player_2);
+      losers.back()->matches[i / 2]->set_players(player_1, player_2);
       players_in_bracket.push_back(player_1);
       players_in_bracket.push_back(player_2);
     }

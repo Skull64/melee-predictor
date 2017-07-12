@@ -1,6 +1,8 @@
 CXX = g++
 CXXFLAGS = -O2
 
+ASTYLE_DIR = $$HOME/astyle
+
 all: clean build run
 
 build:
@@ -9,6 +11,10 @@ build:
 
 run:
 	./predictor
+
+format:
+	$(ASTYLE_DIR)/astyle --options=$(ASTYLE_DIR)/google.ini \
+	                     --verbose --formatted *.cpp *.hpp
 
 clean:
 	rm -f *.o predictor

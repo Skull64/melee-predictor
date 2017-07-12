@@ -6,7 +6,7 @@
 
 #include "Bracket.hpp"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   int n = 1e5;  // Number of simulations
 
   int num_W = 32;  // Number of players in winners bracket
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
   playerLibrary players = load_player_data();
 
   // Setup the bracket
-  Bracket *bracket = new Bracket(num_W, num_L);
+  Bracket* bracket = new Bracket(num_W, num_L);
   bracket->set_player_library(players);
   bracket->set_structure(wl_map);
   std::vector<Player*> players_in_bracket = bracket->set_initial_players();
@@ -60,11 +60,11 @@ int main(int argc, char **argv) {
   start = std::chrono::high_resolution_clock::now();
   for (int i = 0; i < n; i++) {
     bracket->simulate(true);
-    if (n > pbarWidth && i%(n / pbarWidth) == 0) {
+    if (n > pbarWidth && i % (n / pbarWidth) == 0) {
       int pos = i * pbarWidth / n;
       int pct = i * 100 / n;
       std::cout << "[" << std::string(pos, '=') << ">" <<
-                   std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
+                std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
       std::cout.flush();
     }
   }
