@@ -3,7 +3,7 @@ CXXFLAGS = -O2
 
 ASTYLE_DIR = $$HOME/astyle
 
-all: clean build run
+all: clean build
 
 build:
 	$(CXX) $(CXXFLAGS) -c Bracket.cpp
