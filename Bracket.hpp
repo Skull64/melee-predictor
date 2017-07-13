@@ -59,6 +59,12 @@ class Match {
   void set_structure(Match*, int, Match*, int);
   void set_players(Player*, Player*);
   void simulate(bool);
+
+  // Used for GF1 only
+  bool bracket_reset;
+  Match* wside_winner_to, *wside_loser_to, *lside_winner_to, *lside_loser_to;
+  int wside_wt_index, wside_lt_index, lside_wt_index, lside_lt_index;
+  void set_structure_gf1(Match*, int, Match*, int, Match*, int, Match*, int);
 };
 
 class Round {

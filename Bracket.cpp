@@ -104,6 +104,19 @@ void Match::set_structure(Match* wt, int wti, Match* lt, int lti) {
   lt_index = lti;
 }
 
+// Set the structure of Grand finals set 1
+void Match::set_structure_gf1(Match* w_wt, int w_wti, Match* l_lt, int l_lti,
+                              Match* w_lt, int w_lti, Match* l_wt, int l_wti) {
+  wside_winner_to = w_wt;
+  lside_loser_to = l_lt;
+  wside_loser_to = w_lt;
+  lside_winner_to = l_wt;
+  wside_wt_index = w_wti;  // 0
+  lside_lt_index = l_lti;  // 0
+  wside_lt_index = w_lti;  // 1
+  lside_wt_index = l_wti;  // 0
+}
+
 // Set the players taking place in a match
 void Match::set_players(Player* p1, Player* p2) {
   player_1 = p1;
@@ -145,9 +158,29 @@ void Match::simulate(bool update_ratings) {
   // Send the players to their next match
   // assert(wt_index == 0 || wt_index == 1);
   // assert(lt_index == 0 || lt_index == 1);
-  /* if (side == 'G' && round_id == 1) {
-    // Put something here
-  } else */ {
+  if (side == 'G' && round_id == 1) {  // Grand finals set 1
+    if (result == 1) {  // Player from winners bracket wins
+      bracket_reset = false;
+      if (wside_wt_index == 0)
+        wside_winner_to->player_1 = winner;
+      else
+        wside_winner_to->player_2 = winner;
+      if (lside_lt_index == 0)
+        lside_loser_to->player_1 = loser;
+      else
+        lside_loser_to->player_2 = loser;
+    } else {  // Player from losers bracket wins
+      bracket_reset = true;
+      if (wside_lt_index == 0)
+        wside_loser_to->player_1 = loser;
+      else
+        wside_loser_to->player_2 = loser;
+      if (lside_wt_index == 0)
+        lside_winner_to->player_1 = winner;
+      else
+        lside_winner_to->player_2 = winner;
+    }
+  } else {  // Every other set
     if (wt_index == 0)
       winner_to->player_1 = winner;
     else
@@ -158,7 +191,7 @@ void Match::simulate(bool update_ratings) {
       loser_to->player_2 = loser;
   }
 
-  // Update rating and RD
+  // Update ratings and RDs
   if (update_ratings) {
     float g1, g2, E1, E2, x1, x2, y1, y2;
     dif = player_1->rating - player_2->rating;
@@ -350,13 +383,11 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
   grands[0]->matches[0]->set_structure(placings[0]->matches[0], 0,
                                        placings[1]->matches[0], 0);
 
-  // Grand finals
-  //grands[1]->matches[0]->set_structure_gf1(placings[0]->matches[0], 0,
-  //                                         placings[1]->matches[0], 0,
-  //                                         grands[0]->matches[0], 1,
-  //                                         grands[0]->matches[0], 0)
-  grands[1]->matches[0]->set_structure(placings[0]->matches[0], 0,
-                                       placings[1]->matches[0], 0);
+  // Grand finals set 1
+  grands[1]->matches[0]->set_structure_gf1(placings[0]->matches[0], 0,
+                                           placings[1]->matches[0], 0,
+                                           grands[0]->matches[0], 1,
+                                           grands[0]->matches[0], 0);
 
 }
 
@@ -430,9 +461,11 @@ void Bracket::set_res_fixed(std::vector<std::vector<int>> res_fixed_W,
 
 // Update player results (post-simulation)
 void Bracket::update_player_results() {
+  // 1st-4th place: 1 player each
   for (int i = 0; i < 4; i++) {
     placings[i]->matches[0]->player_1->placings[i] += 1;
   }
+  // 5th place and on: multiple players each
   for (int i = 4; i < 12; i++) {
     for (std::vector<Match*>::iterator it = placings[i]->matches.begin();
          it != placings[i]->matches.end(); it++) {
@@ -454,7 +487,8 @@ void Bracket::simulate(bool update_ratings) {
     (*it)->simulate(update_ratings);
   }
   grands[1]->simulate(update_ratings);
-  //grands[0]->simulate(update_ratings);
+  if (grands[1]->matches[0]->bracket_reset)
+    grands[0]->simulate(update_ratings);
 
   update_player_results();
 }
