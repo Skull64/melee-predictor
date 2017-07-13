@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -16,6 +17,14 @@ extern float qs;
 float rand_float();
 float square();
 int int_power();
+
+void load_section(std::ifstream&, std::vector<std::vector<int>>&);
+
+void load_bracket_params(int&, int&,
+                         std::vector<std::vector<int>>&,
+                         std::vector<std::vector<int>>&,
+                         std::vector<std::vector<int>>&,
+                         std::vector<std::vector<int>>&);
 
 class Player {
  public:

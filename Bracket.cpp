@@ -34,6 +34,49 @@ int int_power(int x, int n) {
   return x * y;
 }
 
+// Load a section from file
+void load_section(std::ifstream& infile, std::vector<std::vector<int>>& out_vec) {
+  std::string buffer;
+  int temp;
+  while (buffer.empty())
+    std::getline(infile, buffer);
+  while (!buffer.empty()) {
+    std::stringstream iss(buffer);
+    std::vector<int> tempvec;
+    while (iss >> temp)
+      tempvec.push_back(temp);
+    out_vec.push_back(tempvec);
+    std::getline(infile, buffer);
+  }
+}
+
+// Load bracket parameters from file
+void load_bracket_params(int& num_W, int& num_L,
+                         std::vector<std::vector<int>>& wl_map,
+                         std::vector<std::vector<int>>& res_fixed_W,
+                         std::vector<std::vector<int>>& res_fixed_L,
+                         std::vector<std::vector<int>>& res_fixed_G) {
+  std::ifstream infile("bracket_params.txt");
+
+  // Number of players in each side of the bracket
+  std::string buffer;
+  std::getline(infile, buffer);
+  num_W = std::stoi(buffer);
+  std::getline(infile, buffer);
+  num_L = std::stoi(buffer);
+  std::getline(infile, buffer);
+
+  // Locations in losers bracket where players get sent from winners bracket
+  load_section(infile, wl_map);
+
+  // Fixed results
+  load_section(infile, res_fixed_W);
+  load_section(infile, res_fixed_L);
+  load_section(infile, res_fixed_G);
+
+  infile.close();
+}
+
 // Player object constructor
 Player::Player(std::string nam, float rat, float rd) {
   name = nam;
@@ -274,14 +317,6 @@ Round::Round(char sid, int rid) {
       name = "33rd-48th Place";
     else if (round_id == 11)
       name = "49th-64th Place";
-    //else if (round_id == 12)
-    //  name = "65th-96th Place";
-    //else if (round_id == 13)
-    //  name = "97th-128th Place";
-    //else if (round_id == 14)
-    //  name = "129th-192nd Place";
-    //else if (round_id == 15)
-    //  name = "193rd-256th Place";
     else
       name = "";
   }

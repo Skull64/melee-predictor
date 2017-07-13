@@ -7,39 +7,15 @@
 #include "Bracket.hpp"
 
 int main(int argc, char** argv) {
-  int n = 1e5;  // Number of simulations
+  // Number of simulations
+  int n = 1e5;
+  if (argc > 1)
+    n = std::stoi(argv[1]);
 
-  int num_W = 32;  // Number of players in winners bracket
-  int num_L = 32;  // Number of players in losers bracket
-
-  // Locations in losers bracket where you get sent from winners bracket
-  std::vector<std::vector<int>> wl_map;
-  wl_map.push_back({0, 1});  // WSF to LQF
-  wl_map.push_back({2, 3, 0, 1});  // WQF to LT12
-  wl_map.push_back({3, 2, 1, 0, 7, 6, 5, 4});  // WT24 to LT24
-  wl_map.push_back({15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1});  // WT48 to LT48
-
-  // Fixed results
-  std::vector<std::vector<int>> res_fixed_W, res_fixed_L, res_fixed_G;
-  res_fixed_W.push_back({0});  // WF
-  res_fixed_W.push_back({0, 0});  // WSF
-  res_fixed_W.push_back({0, 0, 0, 0});  // WQF
-  res_fixed_W.push_back({0, 0, 0, 0, 0, 0, 0, 0});  // WT24
-  res_fixed_W.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});  // WT48
-
-  res_fixed_L.push_back({0});  // LF
-  res_fixed_L.push_back({0});  // LSF
-  res_fixed_L.push_back({0, 0});  // LQF
-  res_fixed_L.push_back({0, 0});  // LT8
-  res_fixed_L.push_back({0, 0, 0, 0});  // LT12
-  res_fixed_L.push_back({0, 0, 0, 0});  // LT16
-  res_fixed_L.push_back({0, 0, 0, 0, 0, 0, 0, 0});  // LT24
-  res_fixed_L.push_back({0, 0, 0, 0, 0, 0, 0, 0});  // LT32
-  res_fixed_L.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});  // LT48
-  res_fixed_L.push_back({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});  // LT64
-
-  res_fixed_G.push_back({0});  // GF
-  res_fixed_G.push_back({0});  // GF2
+  // Load bracket parameters from file
+  int num_W, num_L;
+  std::vector<std::vector<int>> wl_map, res_fixed_W, res_fixed_L, res_fixed_G;
+  load_bracket_params(num_W, num_L, wl_map, res_fixed_W, res_fixed_L, res_fixed_G);
 
   // Load player data from file
   playerLibrary players = load_player_data();
