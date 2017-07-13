@@ -40,6 +40,7 @@ Player::Player(std::string nam, float rat, float rd) {
   rating_orig = rat;
   RD_orig = rd;
   placings.resize(12);
+  avg_points = 0.;
 }
 
 // Reset a player's rating back to its original value
@@ -54,6 +55,7 @@ void Player::update_orig_rating() {
   RD_orig = RD;
 }
 
+// Calculate the average number of points obtained by a player
 void Player::calc_avg_points() {
   int t = 0;
   float p = 100.;
@@ -78,6 +80,7 @@ playerLibrary load_player_data() {
   return players;
 }
 
+// Reset all player ratings and RDs
 void reset_players(playerLibrary player_library) {
   for (playerLibrary::iterator it = player_library.begin();
        it != player_library.end(); it++) {
@@ -238,10 +241,14 @@ Round::Round(char sid, int rid) {
       name = "33rd-48th Place";
     else if (round_id == 11)
       name = "49th-64th Place";
-    //else if (round_id == 12) name = "65th-96th Place";
-    //else if (round_id == 13) name = "97th-128th Place";
-    //else if (round_id == 14) name = "129th-192nd Place";
-    //else if (round_id == 15) name = "193rd-256th Place";
+    //else if (round_id == 12)
+    //  name = "65th-96th Place";
+    //else if (round_id == 13)
+    //  name = "97th-128th Place";
+    //else if (round_id == 14)
+    //  name = "129th-192nd Place";
+    //else if (round_id == 15)
+    //  name = "193rd-256th Place";
     else
       name = "";
   }
@@ -357,12 +364,21 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
 std::vector<Player*> Bracket::set_initial_players() {
   std::ifstream file("initial_bracket.txt");
   std::string name;
-  Player* player_1, *player_2;
+  Player* player, *player_1, *player_2;
   std::vector<Player*> players_in_bracket;
+
+  // Winners bracket
   int i = 0;
   while (std::getline(file, name)) {
+    // Blank line means end of players in winners bracket
     if (name.empty())
       break;
+    // If player not found, create player with default values
+    if (player_library.find(name) == player_library.end()) {
+      player = new Player(name, 1500., 0.);
+      player_library.insert(std::pair<std::string, Player*>(name, player));
+    }
+    // Place the players in winners bracket
     if (i % 2 == 0) {
       player_1 = player_library.find(name)->second;
     } else {
@@ -373,10 +389,19 @@ std::vector<Player*> Bracket::set_initial_players() {
     }
     i++;
   }
+
+  // Losers bracket
   i = 0;
   while (std::getline(file, name)) {
+    // Blank line means end of players in losers bracket
     if (name.empty())
       break;
+    // If player not found, create player with default values
+    if (player_library.find(name) == player_library.end()) {
+      player = new Player(name, 1500., 0.);
+      player_library.insert(std::pair<std::string, Player*>(name, player));
+    }
+    // Place the players in losers bracket
     if (i % 2 == 0) {
       player_1 = player_library.find(name)->second;
     } else {
@@ -387,6 +412,7 @@ std::vector<Player*> Bracket::set_initial_players() {
     }
     i++;
   }
+
   return players_in_bracket;
 }
 
