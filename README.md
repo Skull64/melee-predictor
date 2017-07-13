@@ -57,7 +57,9 @@ Usage
 **Setup**
 
 The predictor requires three text files to be in the same directory:
-`bracket_params.txt`, `initial_bracket.txt`, and `player_data.txt`.
+`bracket_params.txt`, `initial_bracket.txt`, and `player_data.txt`. To see
+examples of these files as they were used for Genesis 4, see the `genesis_4`
+subdirectory.
 
 `bracket_params.txt` contains information about how the bracket is set up, and
 it contains five sections delimited by blank lines. The first section consists
