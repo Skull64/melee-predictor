@@ -1,14 +1,19 @@
 #include <chrono>
 #include <string>
+#include <vector>
+
+#if defined __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <vector>
+#elif defined _WIN32
+#include <windows.h>
+#endif
 
 #include "Bracket.hpp"
 
 int main(int argc, char** argv) {
   // Number of simulations
-  int n = 1e5;
+  int n = 100000;
   if (argc > 1)
     n = std::stoi(argv[1]);
 
@@ -29,10 +34,27 @@ int main(int argc, char** argv) {
 
   std::chrono::high_resolution_clock::time_point start, end;
 
+  // Progress bar setup
+#if defined __linux__
+  int pbarWidth;
+  {
+    struct winsize console_size;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &console_size);
+    pbarWidth = console_size.ws_col - 8;
+  }
+#elif defined _WIN32
+  int pbarWidth;
+  {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    pbarWidth = columns - 8;
+  }
+#else
+  int pbarWidth = 100;
+#endif
+
   // Simulate the bracket n times
-  struct winsize console_size;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &console_size);
-  int pbarWidth = console_size.ws_col - 8;
   start = std::chrono::high_resolution_clock::now();
   for (int i = 0; i < n; i++) {
     bracket->simulate(true);
