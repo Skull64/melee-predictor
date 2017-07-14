@@ -35,24 +35,21 @@ int main(int argc, char** argv) {
   std::chrono::high_resolution_clock::time_point start, end;
 
   // Progress bar setup
-#if defined __linux__
   int pbarWidth;
   {
+#if defined __linux__
     struct winsize console_size;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &console_size);
     pbarWidth = console_size.ws_col - 8;
-  }
 #elif defined _WIN32
-  int pbarWidth;
-  {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     pbarWidth = columns - 8;
-  }
 #else
-  int pbarWidth = 100;
+  pbarWidth = 100;
 #endif
+  }
 
   // Simulate the bracket n times
   start = std::chrono::high_resolution_clock::now();
