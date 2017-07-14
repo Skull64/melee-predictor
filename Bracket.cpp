@@ -38,7 +38,7 @@ int int_power(int x, int n) {
 std::ifstream open_file(std::string fname) {
   std::ifstream infile(fname);
   if (infile.fail()) {
-    std::cout << fname << " not found. Aborting." << std::endl;
+    std::cout << "ERROR: " << fname << " not found. Aborting." << std::endl;
     exit(EXIT_FAILURE);
   }
   return infile;
@@ -443,6 +443,9 @@ std::vector<Player*> Bracket::set_initial_players() {
   Player* player, *player_1, *player_2;
   std::vector<Player*> players_in_bracket;
 
+  float rating_default = 1500.;
+  float RD_default = 0.;
+
   // Winners bracket
   int i = 0;
   while (std::getline(infile, name)) {
@@ -451,7 +454,10 @@ std::vector<Player*> Bracket::set_initial_players() {
       break;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
-      player = new Player(name, 1500., 0.);
+      std::cout << "WARNING: Player \"" << name <<
+                   "\" not found. Using default rating, RD of " <<
+                   rating_default << ", " << RD_default << "." << std::endl;
+      player = new Player(name, rating_default, RD_default);
       player_library.insert(std::pair<std::string, Player*>(name, player));
     }
     // Place the players in winners bracket
@@ -474,7 +480,7 @@ std::vector<Player*> Bracket::set_initial_players() {
       break;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
-      player = new Player(name, 1500., 0.);
+      player = new Player(name, rating_default, RD_default);
       player_library.insert(std::pair<std::string, Player*>(name, player));
     }
     // Place the players in losers bracket
