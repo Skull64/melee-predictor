@@ -502,6 +502,8 @@ std::vector<Player*> Bracket::set_initial_players() {
       break;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
+      throw_warning("Player \"" + name + "\" not found. Using default rating, RD of " +
+                    std::to_string(rating_default) + ", " + std::to_string(RD_default));
       player = new Player(name, rating_default, RD_default);
       player_library.insert(std::pair<std::string, Player*>(name, player));
     }
