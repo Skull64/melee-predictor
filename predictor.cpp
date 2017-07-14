@@ -14,8 +14,17 @@
 int main(int argc, char** argv) {
   // Number of simulations
   int n = 100000;
-  if (argc > 1)
-    n = std::stoi(argv[1]);
+  if (argc > 1) {
+    try {
+      n = std::stoi(argv[1]);
+      if (n <= 0)
+        throw 1;
+    } catch (...) {
+      std::string n_str(argv[1]);
+      throw_error("Number of simulations = " + n_str +
+                  ", must be a positive integer");
+    }
+  }
 
   // Load bracket parameters from file
   int num_W, num_L;
