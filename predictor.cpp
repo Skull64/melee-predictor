@@ -25,11 +25,15 @@ int main(int argc, char** argv) {
   // Load player data from file
   playerLibrary players = load_player_data();
 
+  // Load initial player locations from file
+  std::vector<std::string> players_W, players_L;
+  load_initial_players(players_W, players_L);
+
   // Setup the bracket
   Bracket* bracket = new Bracket(num_W, num_L);
   bracket->set_player_library(players);
   bracket->set_structure(wl_map);
-  std::vector<Player*> players_in_bracket = bracket->set_initial_players();
+  std::vector<Player*> players_in_bracket = bracket->set_initial_players(players_W, players_L);
   bracket->set_res_fixed(res_fixed_W, res_fixed_L, res_fixed_G);
 
   std::chrono::high_resolution_clock::time_point start, end;

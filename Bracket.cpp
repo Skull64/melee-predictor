@@ -110,6 +110,27 @@ void load_bracket_params(int& num_W, int& num_L,
   infile.close();
 }
 
+// Load the initial player locations from file
+void load_initial_players(std::vector<std::string>& players_W,
+                          std::vector<std::string>& players_L) {
+  std::ifstream infile = open_file("initial_bracket.txt");
+  std::string name;
+
+  // Winners bracket
+  std::getline(infile, name);
+  while (!name.empty()) {
+    players_W.push_back(name);
+    std::getline(infile, name);
+  }
+
+  // Losers bracket
+  std::getline(infile, name);
+  while (!name.empty()) {
+    players_L.push_back(name);
+    std::getline(infile, name);
+  }
+}
+
 // Player object constructor
 Player::Player(std::string nam, float rat, float rd) {
   name = nam;
@@ -117,6 +138,17 @@ Player::Player(std::string nam, float rat, float rd) {
   RD_orig = rd;
   placings.resize(12);
   avg_points = 0.;
+}
+
+// Player object copy constructor
+Player::Player(const Player& orig) {
+  name = orig.name;
+  rating = orig.rating;
+  RD = orig.RD;
+  rating_orig = orig.rating_orig;
+  RD_orig = orig.RD_orig;
+  placings = orig.placings;
+  avg_points = orig.avg_points;
 }
 
 // Reset a player's rating back to its original value
@@ -459,9 +491,9 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
 
 }
 
-// Load the initial player locations from file
-std::vector<Player*> Bracket::set_initial_players() {
-  std::ifstream infile = open_file("initial_bracket.txt");
+// Set the initial player locations
+std::vector<Player*> Bracket::set_initial_players(std::vector<std::string> players_W,
+                                                  std::vector<std::string> players_L) {
   std::string name;
   Player* player, *player_1, *player_2;
   std::vector<Player*> players_in_bracket;
@@ -471,10 +503,9 @@ std::vector<Player*> Bracket::set_initial_players() {
 
   // Winners bracket
   int i = 0;
-  while (std::getline(infile, name)) {
-    // Blank line means end of players in winners bracket
-    if (name.empty())
-      break;
+  for (std::vector<std::string>::iterator it = players_W.begin();
+       it != players_W.end(); it++) {
+    std::string name = *it;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
       throw_warning("Player \"" + name + "\" not found. Using default rating, RD of " +
@@ -496,10 +527,9 @@ std::vector<Player*> Bracket::set_initial_players() {
 
   // Losers bracket
   i = 0;
-  while (std::getline(infile, name)) {
-    // Blank line means end of players in losers bracket
-    if (name.empty())
-      break;
+  for (std::vector<std::string>::iterator it = players_L.begin();
+       it != players_L.end(); it++) {
+    std::string name = *it;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
       throw_warning("Player \"" + name + "\" not found. Using default rating, RD of " +

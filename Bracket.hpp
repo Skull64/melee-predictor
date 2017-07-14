@@ -37,6 +37,8 @@ void load_bracket_params(int&, int&,
                          std::vector<std::vector<int>>&,
                          std::vector<std::vector<int>>&);
 
+void load_initial_players(std::vector<std::string>&, std::vector<std::string>&);
+
 class Player {
  public:
   std::string name;
@@ -45,7 +47,8 @@ class Player {
   std::vector<int> placings;
   float avg_points;
 
-  Player(std::string, float, float);
+  Player(std::string, float, float);  // constructor
+  Player(const Player&);  // copy constructor
   void reset_rating();
   void update_orig_rating();
   void calc_avg_points();
@@ -75,7 +78,7 @@ class Match {
   int result, result_fixed;
   Player* winner, *loser;
 
-  Match(std::string, char, int, int);
+  Match(std::string, char, int, int); // constructor
   void set_structure(Match*, int, Match*, int);
   void set_players(Player*, Player*);
   void simulate(bool);
@@ -109,7 +112,8 @@ class Bracket {
   Bracket(int, int);
   void set_player_library(playerLibrary);
   void set_structure(std::vector<std::vector<int>>);
-  std::vector<Player*> set_initial_players();
+  std::vector<Player*> set_initial_players(std::vector<std::string>,
+                       std::vector<std::string>);
   void set_res_fixed(std::vector<std::vector<int>>,
                      std::vector<std::vector<int>>,
                      std::vector<std::vector<int>>);
