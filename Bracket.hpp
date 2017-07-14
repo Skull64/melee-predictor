@@ -10,9 +10,18 @@
 
 #include "math.h"
 
+// Output color and formatting
+#define RST "\x1B[0m"
+#define FRED(x) "\x1B[31m" x RST
+#define FYEL(x) "\x1B[33m" x RST
+#define BOLD(x) "\x1B[1m" x RST
+
 extern float pi;
 extern float q;
 extern float qs;
+
+void throw_error(std::string);
+void throw_warning(std::string);
 
 float rand_float();
 float square();

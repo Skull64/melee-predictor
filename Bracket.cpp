@@ -4,6 +4,15 @@ float pi = 3.14159265358979E+00;
 float q  = 5.75646273248511E-03;
 float qs = 3.31368631904900E-05;
 
+void throw_error(std::string msg) {
+  std::cerr << BOLD(FRED("ERROR: ")) << msg << std::endl;
+  exit(EXIT_FAILURE);
+}
+
+void throw_warning(std::string msg) {
+  std::cerr << BOLD(FYEL("WARNING: ")) << msg << std::endl;
+}
+
 // Return a random float between 0 and 1
 float rand_float() {
   return ((float) rand()) / RAND_MAX;
@@ -37,10 +46,8 @@ int int_power(int x, int n) {
 // Open a file
 std::ifstream open_file(std::string fname) {
   std::ifstream infile(fname);
-  if (infile.fail()) {
-    std::cout << "ERROR: " << fname << " not found. Aborting." << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  if (infile.fail())
+    throw_error(fname + " not found.");
   return infile;
 }
 
@@ -454,9 +461,10 @@ std::vector<Player*> Bracket::set_initial_players() {
       break;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
-      std::cout << "WARNING: Player \"" << name <<
-                   "\" not found. Using default rating, RD of " <<
-                   rating_default << ", " << RD_default << "." << std::endl;
+      throw_warning("Player \"" + name +
+                    "\" not found. Using default rating, RD of " +
+                    std::to_string(rating_default) + ", " +
+                    std::to_string(RD_default) + ".");
       player = new Player(name, rating_default, RD_default);
       player_library.insert(std::pair<std::string, Player*>(name, player));
     }
