@@ -466,8 +466,8 @@ std::vector<Player*> Bracket::set_initial_players() {
   Player* player, *player_1, *player_2;
   std::vector<Player*> players_in_bracket;
 
-  float rating_default = 1500.;
-  float RD_default = 0.;
+  float rating_default = 1600.;
+  float RD_default = 200.;
 
   // Winners bracket
   int i = 0;
