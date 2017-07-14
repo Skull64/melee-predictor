@@ -47,7 +47,7 @@ int int_power(int x, int n) {
 std::ifstream open_file(std::string fname) {
   std::ifstream infile(fname);
   if (infile.fail())
-    throw_error(fname + " not found.");
+    throw_error(fname + " not found");
   return infile;
 }
 
@@ -78,9 +78,25 @@ void load_bracket_params(int& num_W, int& num_L,
   // Number of players in each side of the bracket
   std::string buffer;
   std::getline(infile, buffer);
-  num_W = std::stoi(buffer);
+  // Make sure num_W is a power of 2
+  try {
+    num_W = std::stoi(buffer);
+    if (((num_W & (num_W - 1)) != 0) || num_W <= 0)
+      throw 1;
+  } catch (...) {
+    throw_error("Number of players in winners bracket = " +
+                buffer + ", must be a power of 2");
+  }
   std::getline(infile, buffer);
-  num_L = std::stoi(buffer);
+  // Make sure num_L = num_W
+  try {
+    num_L = std::stoi(buffer);
+    if (num_L != num_W)
+      throw 1;
+  } catch (...) {
+    throw_error("Number of players in losers bracket = " + buffer +
+                ", must be be the same as the number of players in winners bracket");
+  }
   std::getline(infile, buffer);
 
   // Locations in losers bracket where players get sent from winners bracket
@@ -461,10 +477,8 @@ std::vector<Player*> Bracket::set_initial_players() {
       break;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
-      throw_warning("Player \"" + name +
-                    "\" not found. Using default rating, RD of " +
-                    std::to_string(rating_default) + ", " +
-                    std::to_string(RD_default) + ".");
+      throw_warning("Player \"" + name + "\" not found. Using default rating, RD of " +
+                    std::to_string(rating_default) + ", " + std::to_string(RD_default));
       player = new Player(name, rating_default, RD_default);
       player_library.insert(std::pair<std::string, Player*>(name, player));
     }

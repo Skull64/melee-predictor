@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     pbarWidth = columns - 8;
 #else
-  pbarWidth = 100;
+    pbarWidth = 100;
 #endif
   }
 
