@@ -210,7 +210,7 @@ void Match::simulate(bool update_ratings) {
   // Determine a winner
   if (result == 0) {
     dif = player_1->rating - player_2->rating;
-    RD = sqrt(player_1->RD * player_1->RD + player_2->RD * player_2->RD);
+    RD = sqrt(square(player_1->RD) + square(player_2->RD));
     g = 1. / sqrt(1. + 3. * square(q * RD / pi));
     E = 1. / (1. + pow(10., -g * dif / 400.));
     if (E > rand_float())
