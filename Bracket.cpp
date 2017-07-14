@@ -34,6 +34,16 @@ int int_power(int x, int n) {
   return x * y;
 }
 
+// Open a file
+std::ifstream open_file(std::string fname) {
+  std::ifstream infile(fname);
+  if (infile.fail()) {
+    std::cout << fname << " not found. Aborting." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  return infile;
+}
+
 // Load a section from file
 void load_section(std::ifstream& infile, std::vector<std::vector<int>>& out_vec) {
   std::string buffer;
@@ -56,7 +66,7 @@ void load_bracket_params(int& num_W, int& num_L,
                          std::vector<std::vector<int>>& res_fixed_W,
                          std::vector<std::vector<int>>& res_fixed_L,
                          std::vector<std::vector<int>>& res_fixed_G) {
-  std::ifstream infile("bracket_params.txt");
+  std::ifstream infile = open_file("bracket_params.txt");
 
   // Number of players in each side of the bracket
   std::string buffer;
@@ -113,7 +123,7 @@ void Player::calc_avg_points() {
 // Load player data from file
 playerLibrary load_player_data() {
   playerLibrary players;
-  std::ifstream infile("player_data.txt");
+  std::ifstream infile = open_file("player_data.txt");
   std::string name;
   float rating_orig, RD_orig;
   while (infile >> name >> rating_orig >> RD_orig) {
@@ -428,14 +438,14 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
 
 // Load the initial player locations from file
 std::vector<Player*> Bracket::set_initial_players() {
-  std::ifstream file("initial_bracket.txt");
+  std::ifstream infile = open_file("initial_bracket.txt");
   std::string name;
   Player* player, *player_1, *player_2;
   std::vector<Player*> players_in_bracket;
 
   // Winners bracket
   int i = 0;
-  while (std::getline(file, name)) {
+  while (std::getline(infile, name)) {
     // Blank line means end of players in winners bracket
     if (name.empty())
       break;
@@ -458,7 +468,7 @@ std::vector<Player*> Bracket::set_initial_players() {
 
   // Losers bracket
   i = 0;
-  while (std::getline(file, name)) {
+  while (std::getline(infile, name)) {
     // Blank line means end of players in losers bracket
     if (name.empty())
       break;

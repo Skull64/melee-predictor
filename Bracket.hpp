@@ -18,6 +18,8 @@ float rand_float();
 float square();
 int int_power();
 
+std::ifstream open_file(std::string);
+
 void load_section(std::ifstream&, std::vector<std::vector<int>>&);
 
 void load_bracket_params(int&, int&,
