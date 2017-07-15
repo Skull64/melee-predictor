@@ -2,10 +2,6 @@
 #include <string>
 #include <vector>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 #if defined __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -50,18 +46,20 @@ int main(int argc, char** argv) {
   load_initial_players(players_W, players_L);
 
   // Load player data from file
-  playerLibrary player_library = load_player_data();
-  std::vector<playerLibrary> PL(num_threads);
-  PL[0] = player_library;
-  for (int i = 1; i < num_threads; i++)
-    PL[i] = copy_player_library(player_library);
+  std::vector<playerLibrary> player_libraries(num_threads);
+  player_libraries[0] = load_player_data();
+  for (int t = 1; t < num_threads; t++)
+    player_libraries[t] = copy_player_library(player_libraries[0]);
 
   // Setup the bracket
-  Bracket* bracket = new Bracket(num_W, num_L);
-  bracket->set_player_library(player_library);
-  bracket->set_structure(wl_map);
-  std::vector<Player*> players_in_bracket = bracket->set_initial_players(players_W, players_L);
-  bracket->set_res_fixed(res_fixed_W, res_fixed_L, res_fixed_G);
+  std::vector<Bracket*> brackets(num_threads);
+  for (int t = 0; t < num_threads; t++) {
+    brackets[t] = new Bracket(num_W, num_L);
+    brackets[t]->set_player_library(player_libraries[t]);
+    brackets[t]->set_structure(wl_map);
+    brackets[t]->set_initial_players(players_W, players_L, t);
+    brackets[t]->set_res_fixed(res_fixed_W, res_fixed_L, res_fixed_G);
+  }
 
   std::chrono::high_resolution_clock::time_point start, end;
 
@@ -85,7 +83,7 @@ int main(int argc, char** argv) {
   // Simulate the bracket n times
   start = std::chrono::high_resolution_clock::now();
   for (int i = 0; i < n; i++) {
-    bracket->simulate(true);
+    brackets[0]->simulate(true);
     if (n > pbarWidth && i % (n / pbarWidth) == 0) {
       int pos = i * pbarWidth / n;
       int pct = i * 100 / n;
@@ -99,6 +97,7 @@ int main(int argc, char** argv) {
   end = std::chrono::high_resolution_clock::now();
 
   // Print results
+  std::vector<Player*> players_in_bracket = brackets[0]->players_in_bracket;
   for (std::vector<Player*>::iterator it = players_in_bracket.begin();
        it != players_in_bracket.end(); it++) {
     (*it)->calc_avg_points();

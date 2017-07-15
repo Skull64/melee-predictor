@@ -503,11 +503,10 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
 }
 
 // Set the initial player locations
-std::vector<Player*> Bracket::set_initial_players(std::vector<std::string> players_W,
-                                                  std::vector<std::string> players_L) {
+void Bracket::set_initial_players(std::vector<std::string> players_W,
+                                  std::vector<std::string> players_L, int t) {
   std::string name;
   Player* player, *player_1, *player_2;
-  std::vector<Player*> players_in_bracket;
 
   float rating_default = 1600.;
   float RD_default = 200.;
@@ -519,8 +518,9 @@ std::vector<Player*> Bracket::set_initial_players(std::vector<std::string> playe
     std::string name = *it;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
-      throw_warning("Player \"" + name + "\" not found. Using default rating, RD of " +
-                    std::to_string(rating_default) + ", " + std::to_string(RD_default));
+      if (t == 0)
+        throw_warning("Player \"" + name + "\" not found. Using default rating, RD of " +
+                      std::to_string(rating_default) + ", " + std::to_string(RD_default));
       player = new Player(name, rating_default, RD_default);
       player_library.insert(std::pair<std::string, Player*>(name, player));
     }
@@ -543,8 +543,9 @@ std::vector<Player*> Bracket::set_initial_players(std::vector<std::string> playe
     std::string name = *it;
     // If player not found, create player with default values
     if (player_library.find(name) == player_library.end()) {
-      throw_warning("Player \"" + name + "\" not found. Using default rating, RD of " +
-                    std::to_string(rating_default) + ", " + std::to_string(RD_default));
+      if (t == 0)
+        throw_warning("Player \"" + name + "\" not found. Using default rating, RD of " +
+                      std::to_string(rating_default) + ", " + std::to_string(RD_default));
       player = new Player(name, rating_default, RD_default);
       player_library.insert(std::pair<std::string, Player*>(name, player));
     }
@@ -559,8 +560,6 @@ std::vector<Player*> Bracket::set_initial_players(std::vector<std::string> playe
     }
     i++;
   }
-
-  return players_in_bracket;
 }
 
 // Set the results of the matches in a bracket that are already known

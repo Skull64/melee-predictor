@@ -10,6 +10,10 @@
 
 #include "math.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 // Output color and formatting
 #define RST "\x1B[0m"
 #define FRED(x) "\x1B[31m" x RST
@@ -109,13 +113,14 @@ class Bracket {
  public:
   playerLibrary player_library;
   int num_rounds_W, num_rounds_L, num_rounds_G, num_rounds_P;
+  std::vector<Player*> players_in_bracket;
   std::vector<Round*> winners, losers, grands, placings;
 
   Bracket(int, int);
   void set_player_library(playerLibrary);
   void set_structure(std::vector<std::vector<int>>);
-  std::vector<Player*> set_initial_players(std::vector<std::string>,
-                       std::vector<std::string>);
+  void set_initial_players(std::vector<std::string>,
+                           std::vector<std::string>, int);
   void set_res_fixed(std::vector<std::vector<int>>,
                      std::vector<std::vector<int>>,
                      std::vector<std::vector<int>>);
