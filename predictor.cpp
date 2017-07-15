@@ -9,8 +9,6 @@
 
 #include "Bracket.hpp"
 
-std::vector<RNG> rngs;
-
 int main(int argc, char** argv) {
   // OpenMP setup
   int num_threads;
@@ -59,16 +57,6 @@ int main(int argc, char** argv) {
     brackets[t]->set_structure(wl_map);
     brackets[t]->set_initial_players(players_W, players_L, t);
     brackets[t]->set_res_fixed(res_fixed_W, res_fixed_L, res_fixed_G);
-  }
-
-  // Setup RNG
-  std::vector<RNG> rngs;
-  for (int t = 0; t < num_threads; t++) {
-    std::random_device rdv;
-    std::mt19937 gen(rdv());
-    std::uniform_real_distribution<float> dis(0., 1.);
-    RNG rng(gen, dis);
-    rngs.push_back(rng);
   }
 
   // Progress bar setup

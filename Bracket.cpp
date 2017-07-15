@@ -16,8 +16,10 @@ void throw_warning(std::string msg) {
 
 // Return a random float between 0 and 1
 float rand_float() {
-  return rngs[0].second(rngs[0].first);
-  //return ((float) rand()) / RAND_MAX;
+  std::random_device rdv;
+  static std::mt19937 gen(rdv());
+  std::uniform_real_distribution<float> dis(0., 1.);
+  return dis(gen);
 }
 
 // Return the square of a number

@@ -28,11 +28,8 @@
 #define FYEL(x) "\x1B[33m" x RST
 #define BOLD(x) "\x1B[1m" x RST
 
-typedef std::pair<std::mt19937, std::uniform_real_distribution<float>> RNG;
-
 extern float pi, q, qs;
 extern bool update_ratings;
-extern std::vector<RNG> rngs;
 
 void throw_error(std::string);
 void throw_warning(std::string);
@@ -125,7 +122,6 @@ class Bracket {
   int num_rounds_W, num_rounds_L, num_rounds_G, num_rounds_P;
   std::vector<Player*> players_in_bracket;
   std::vector<Round*> winners, losers, grands, placings;
-  RNG rng;
 
   Bracket(int, int);
   void set_player_library(playerLibrary);
