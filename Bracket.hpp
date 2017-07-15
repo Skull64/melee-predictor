@@ -1,17 +1,25 @@
+#ifndef BRACKET_H
+#define BRACKET_H
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <random>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "math.h"
 
+// OpenMP
 #ifdef _OPENMP
 #include <omp.h>
+#define THREAD_NUM omp_get_thread_num()
+#else
+#define THREAD_NUM 0
 #endif
 
 // Output color and formatting
@@ -20,9 +28,11 @@
 #define FYEL(x) "\x1B[33m" x RST
 #define BOLD(x) "\x1B[1m" x RST
 
-extern float pi;
-extern float q;
-extern float qs;
+typedef std::pair<std::mt19937, std::uniform_real_distribution<float>> RNG;
+
+extern float pi, q, qs;
+extern bool update_ratings;
+extern std::vector<RNG> rngs;
 
 void throw_error(std::string);
 void throw_warning(std::string);
@@ -87,7 +97,7 @@ class Match {
   Match(std::string, char, int, int); // constructor
   void set_structure(Match*, int, Match*, int);
   void set_players(Player*, Player*);
-  void simulate(bool);
+  void simulate();
 
   // Used for GF1 only
   bool bracket_reset;
@@ -106,7 +116,7 @@ class Round {
 
   Round(char, int);
   void set_res_fixed(std::vector<int>);
-  void simulate(bool);
+  void simulate();
 };
 
 class Bracket {
@@ -115,6 +125,7 @@ class Bracket {
   int num_rounds_W, num_rounds_L, num_rounds_G, num_rounds_P;
   std::vector<Player*> players_in_bracket;
   std::vector<Round*> winners, losers, grands, placings;
+  RNG rng;
 
   Bracket(int, int);
   void set_player_library(playerLibrary);
@@ -125,5 +136,7 @@ class Bracket {
                      std::vector<std::vector<int>>,
                      std::vector<std::vector<int>>);
   void update_player_results();
-  void simulate(bool);
+  void simulate();
 };
+
+#endif

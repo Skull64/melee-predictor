@@ -1,5 +1,6 @@
 CXX = g++
-CXXFLAGS = -O2 -fopenmp
+#CXXFLAGS = -O2 -fopenmp
+CXXFLAGS = -g
 
 ASTYLE_DIR = $$HOME/astyle
 

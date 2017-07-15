@@ -1,6 +1,4 @@
 #include <chrono>
-#include <string>
-#include <vector>
 
 #if defined __linux__
 #include <sys/ioctl.h>
@@ -10,6 +8,8 @@
 #endif
 
 #include "Bracket.hpp"
+
+std::vector<RNG> rngs;
 
 int main(int argc, char** argv) {
   // OpenMP setup
@@ -61,7 +61,15 @@ int main(int argc, char** argv) {
     brackets[t]->set_res_fixed(res_fixed_W, res_fixed_L, res_fixed_G);
   }
 
-  std::chrono::high_resolution_clock::time_point start, end;
+  // Setup RNG
+  std::vector<RNG> rngs;
+  for (int t = 0; t < num_threads; t++) {
+    std::random_device rdv;
+    std::mt19937 gen(rdv());
+    std::uniform_real_distribution<float> dis(0., 1.);
+    RNG rng(gen, dis);
+    rngs.push_back(rng);
+  }
 
   // Progress bar setup
   int pbarWidth;
@@ -80,13 +88,16 @@ int main(int argc, char** argv) {
 #endif
   }
 
+  std::chrono::high_resolution_clock::time_point start, end;
+
   // Simulate the bracket n times
   std::vector<int> num_sims_per_thread(num_threads);
   start = std::chrono::high_resolution_clock::now();
 #pragma omp parallel for schedule(guided)
   for (int i = 0; i < n; i++) {
-    int t = omp_get_thread_num();
-    brackets[t]->simulate(true);
+    int t = THREAD_NUM;
+    brackets[t]->simulate();
+    num_sims_per_thread[t] += 1;
     //if (n > pbarWidth && i % (n / pbarWidth) == 0) {
     //  int pos = i * pbarWidth / n;
     //  int pct = i * 100 / n;
@@ -94,7 +105,6 @@ int main(int argc, char** argv) {
     //            std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
     //  std::cout.flush();
     //}
-    num_sims_per_thread[t] += 1;
   }
   std::cout << "[" << std::string(pbarWidth, '=') << "] 100%" << std::endl;
   std::cout << std::endl;

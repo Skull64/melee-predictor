@@ -3,6 +3,7 @@
 float pi = 3.14159265358979E+00;
 float q  = 5.75646273248511E-03;
 float qs = 3.31368631904900E-05;
+bool update_ratings = true;
 
 void throw_error(std::string msg) {
   std::cerr << BOLD(FRED("ERROR: ")) << msg << std::endl;
@@ -15,7 +16,8 @@ void throw_warning(std::string msg) {
 
 // Return a random float between 0 and 1
 float rand_float() {
-  return ((float) rand()) / RAND_MAX;
+  return rngs[0].second(rngs[0].first);
+  //return ((float) rand()) / RAND_MAX;
 }
 
 // Return the square of a number
@@ -243,7 +245,7 @@ void Match::set_players(Player* p1, Player* p2) {
 }
 
 // Simulate a match
-void Match::simulate(bool update_ratings) {
+void Match::simulate() {
   float dif, RD, g, E;
   int s1, s2;
 
@@ -406,28 +408,25 @@ Round::Round(char sid, int rid) {
 
 // Set the results of the matches in a round that are already known
 void Round::set_res_fixed(std::vector<int> res_fixed) {
-  for (int i = 0; i < res_fixed.size(); i++) {
+  for (int i = 0; i < res_fixed.size(); i++)
     matches[i]->result_fixed = res_fixed[i];
-  }
 }
 
 // Simulate all the matches in a round
-void Round::simulate(bool update_ratings) {
+void Round::simulate() {
   for (std::vector<Match*>::iterator it = matches.begin();
-       it != matches.end(); it++) {
-    (*it)->simulate(update_ratings);
-  }
+       it != matches.end(); it++)
+    (*it)->simulate();
 }
 
 // Bracket object constructor
 Bracket::Bracket(int num_W, int num_L) {
   // Number of rounds
   num_rounds_W = ((int) ceil(log2(num_W)));  // Winners bracket
-  if (num_L == 0) {
+  if (num_L == 0)
     num_rounds_L = 2 * (num_rounds_W - 1);  // Losers bracket
-  } else {
+  else
     num_rounds_L = num_rounds_W + ((int) ceil(log2(num_L)));
-  }
   num_rounds_G = 2;  // Grand finals
   num_rounds_P = num_rounds_L + 2;  // Placings
 
@@ -455,51 +454,39 @@ void Bracket::set_player_library(playerLibrary pys) {
   player_library = pys;
 }
 
-// Setup the bracket structure; i.e. where the winner and loser of every match
-// goes next
+// Setup the bracket structure; i.e. where the winner and loser of every match goes next
 void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
   // Winners finals
   winners[0]->matches[0]->set_structure(grands[1]->matches[0], 0,
                                         losers[0]->matches[0], 0);
-
   // Other winners bracket
-  for (int rid = 1; rid < num_rounds_W; rid++) {
-    for (int i = 0; i < winners[rid]->num_matches; i++) {
+  for (int rid = 1; rid < num_rounds_W; rid++)
+    for (int i = 0; i < winners[rid]->num_matches; i++)
       winners[rid]->matches[i]->set_structure(winners[rid - 1]->matches[i / 2], i % 2,
                                               losers[rid * 2]->matches[wl_map[rid - 1][i]], 0);
-    }
-  }
 
   // Losers finals
   losers[0]->matches[0]->set_structure(grands[1]->matches[0], 1,
                                        placings[2]->matches[0], 0);
-
   // Losers bracket: no players came directly from winners
-  for (int rid = 1; rid < num_rounds_L; rid += 2) {
-    for (int i = 0; i < losers[rid]->num_matches; i++) {
+  for (int rid = 1; rid < num_rounds_L; rid += 2)
+    for (int i = 0; i < losers[rid]->num_matches; i++)
       losers[rid]->matches[i]->set_structure(losers[rid - 1]->matches[i], 1,
                                              placings[rid + 2]->matches[i / 2], i % 2);
-    }
-  }
-
   // Losers bracket: half the players came directly from winners
-  for (int rid = 2; rid < num_rounds_L; rid += 2) {
-    for (int i = 0; i < losers[rid]->num_matches; i++) {
+  for (int rid = 2; rid < num_rounds_L; rid += 2)
+    for (int i = 0; i < losers[rid]->num_matches; i++)
       losers[rid]->matches[i]->set_structure(losers[rid - 1]->matches[i / 2], i % 2,
                                              placings[rid + 2]->matches[i / 2], i % 2);
-    }
-  }
 
   // Grand finals set 2
   grands[0]->matches[0]->set_structure(placings[0]->matches[0], 0,
                                        placings[1]->matches[0], 0);
-
   // Grand finals set 1
   grands[1]->matches[0]->set_structure_gf1(placings[0]->matches[0], 0,
                                            placings[1]->matches[0], 0,
                                            grands[0]->matches[0], 1,
                                            grands[0]->matches[0], 0);
-
 }
 
 // Set the initial player locations
@@ -591,19 +578,17 @@ void Bracket::update_player_results() {
 }
 
 // Simulate the full bracket
-void Bracket::simulate(bool update_ratings) {
+void Bracket::simulate() {
   reset_players(player_library);
   for (std::vector<Round*>::reverse_iterator it = winners.rbegin();
-       it != winners.rend(); it++) {
-    (*it)->simulate(update_ratings);
-  }
+       it != winners.rend(); it++)
+    (*it)->simulate();
   for (std::vector<Round*>::reverse_iterator it = losers.rbegin();
-       it != losers.rend(); it++) {
-    (*it)->simulate(update_ratings);
-  }
-  grands[1]->simulate(update_ratings);
+       it != losers.rend(); it++)
+    (*it)->simulate();
+  grands[1]->simulate();
   if (grands[1]->matches[0]->bracket_reset)
-    grands[0]->simulate(update_ratings);
+    grands[0]->simulate();
 
   update_player_results();
 }
