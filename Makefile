@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -O2 -fopenmp
-CXXFLAGS_DEBUG = -g
+CXXFLAGS_DEBUG = -g -DPROGRESS_BAR
 
 ASTYLE_DIR = $$HOME/astyle
 

@@ -60,7 +60,9 @@ int main(int argc, char** argv) {
   }
 
   // Progress bar setup
-  int pbarWidth;
+#ifdef PROGRESS_BAR
+  int j = 0;
+  int pbarWidth, pos_prev, pct_prev;
   {
 #if defined __linux__
     struct winsize console_size;
@@ -75,27 +77,37 @@ int main(int argc, char** argv) {
     pbarWidth = 100;
 #endif
   }
+#endif
 
+  std::vector<int> num_sims_per_thread(num_threads);
   std::chrono::high_resolution_clock::time_point start, end;
 
   // Simulate the bracket n times
-  std::vector<int> num_sims_per_thread(num_threads);
   start = std::chrono::high_resolution_clock::now();
 #pragma omp parallel for schedule(guided)
   for (int i = 0; i < n; i++) {
     int t = THREAD_NUM;
     brackets[t]->simulate();
     num_sims_per_thread[t] += 1;
-    //if (n > pbarWidth && i % (n / pbarWidth) == 0) {
-    //  int pos = i * pbarWidth / n;
-    //  int pct = i * 100 / n;
-    //  std::cout << "[" << std::string(pos, '=') << ">" <<
-    //            std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
-    //  std::cout.flush();
-    //}
+#ifdef PROGRESS_BAR
+    j += 1;
+    if (t == 0) {
+      int pos = j * pbarWidth / n;
+      int pct = j * 100 / n;
+      if (pos != pos_prev || pct != pct_prev) {
+        pos_prev = pos;
+        pct_prev = pct;
+        std::cout << "[" << std::string(pos, '=') << ">" <<
+                  std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
+        std::cout.flush();
+      }
+    }
+#endif
   }
+#ifdef PROGRESS_BAR
   std::cout << "[" << std::string(pbarWidth, '=') << "] 100%" << std::endl;
   std::cout << std::endl;
+#endif
   end = std::chrono::high_resolution_clock::now();
 
   // Combine the results from all the threads
