@@ -81,27 +81,38 @@ int main(int argc, char** argv) {
   }
 
   // Simulate the bracket n times
+  std::vector<int> num_sims_per_thread(num_threads);
   start = std::chrono::high_resolution_clock::now();
+#pragma omp parallel for schedule(guided)
   for (int i = 0; i < n; i++) {
-    brackets[0]->simulate(true);
-    if (n > pbarWidth && i % (n / pbarWidth) == 0) {
-      int pos = i * pbarWidth / n;
-      int pct = i * 100 / n;
-      std::cout << "[" << std::string(pos, '=') << ">" <<
-                std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
-      std::cout.flush();
-    }
+    int t = omp_get_thread_num();
+    brackets[t]->simulate(true);
+    //if (n > pbarWidth && i % (n / pbarWidth) == 0) {
+    //  int pos = i * pbarWidth / n;
+    //  int pct = i * 100 / n;
+    //  std::cout << "[" << std::string(pos, '=') << ">" <<
+    //            std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
+    //  std::cout.flush();
+    //}
+    num_sims_per_thread[t] += 1;
   }
   std::cout << "[" << std::string(pbarWidth, '=') << "] 100%" << std::endl;
   std::cout << std::endl;
   end = std::chrono::high_resolution_clock::now();
 
-  // Print results
+  // Combine the results from all the threads
   std::vector<Player*> players_in_bracket = brackets[0]->players_in_bracket;
-  for (std::vector<Player*>::iterator it = players_in_bracket.begin();
-       it != players_in_bracket.end(); it++) {
-    (*it)->calc_avg_points();
+  int num_players = brackets[0]->players_in_bracket.size();
+  int num_placings = brackets[0]->players_in_bracket[0]->placings.size();
+  for (int i = 0; i < num_players; i++) {
+    Player* player = players_in_bracket[i];
+    for (int p = 0; p < num_placings; p++)
+      for (int t = 1; t < num_threads; t++)
+        player->placings[p] += brackets[t]->players_in_bracket[i]->placings[p];
+    player->calc_avg_points();
   }
+
+  // Print results
   std::sort(players_in_bracket.begin(), players_in_bracket.end(), by_avg_points());
   printf("  %-16s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s\n", "", "Points",
          "1st", "2nd", "3rd", "4th", "5th", "7th",
@@ -124,6 +135,10 @@ int main(int argc, char** argv) {
   std::cout << "Number of simulations run: " << n << std::endl;
   std::cout << "Time taken: " << duration << " seconds; "
             << sims_per_second << " per second" << std::endl;
+  std::cout << "Number run by each thread:" << std::endl;
+  for (int t = 0; t < num_threads; t++)
+    std::cout << num_sims_per_thread[t] << "  ";
+  std::cout << std::endl;
 
   return 0;
 }
