@@ -58,6 +58,8 @@ typedef std::map<std::string, Player*> playerLibrary;
 
 playerLibrary load_player_data();
 
+playerLibrary copy_player_library(const playerLibrary&);
+
 void reset_players(playerLibrary);
 
 struct by_avg_points {

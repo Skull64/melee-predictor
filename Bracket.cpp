@@ -177,15 +177,26 @@ void Player::calc_avg_points() {
 
 // Load player data from file
 playerLibrary load_player_data() {
-  playerLibrary players;
+  playerLibrary player_library;
   std::ifstream infile = open_file("player_data.txt");
   std::string name;
   float rating_orig, RD_orig;
   while (infile >> name >> rating_orig >> RD_orig) {
     Player* player = new Player(name, rating_orig, RD_orig);
-    players.insert(std::pair<std::string, Player*>(name, player));
+    player_library.insert(std::pair<std::string, Player*>(name, player));
   }
-  return players;
+  return player_library;
+}
+
+// Copy a player library
+playerLibrary copy_player_library(const playerLibrary& orig) {
+  playerLibrary player_library;
+  for (playerLibrary::const_iterator it = orig.begin(); it != orig.end(); it++) {
+    std::string name = (*it).first;
+    Player* player = new Player(*((*it).second));
+    player_library.insert(std::pair<std::string, Player*>(name, player));
+  }
+  return player_library;
 }
 
 // Reset all player ratings and RDs

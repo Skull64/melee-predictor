@@ -2,6 +2,10 @@
 #include <string>
 #include <vector>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #if defined __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -12,6 +16,16 @@
 #include "Bracket.hpp"
 
 int main(int argc, char** argv) {
+  // OpenMP setup
+  int num_threads;
+#ifdef _OPENMP
+#pragma omp parallel
+#pragma omp single
+  num_threads = omp_get_num_threads();
+#else
+  num_threads = 1;
+#endif
+
   // Number of simulations
   int n = 100000;
   if (argc > 1) {
@@ -31,16 +45,20 @@ int main(int argc, char** argv) {
   std::vector<std::vector<int>> wl_map, res_fixed_W, res_fixed_L, res_fixed_G;
   load_bracket_params(num_W, num_L, wl_map, res_fixed_W, res_fixed_L, res_fixed_G);
 
-  // Load player data from file
-  playerLibrary players = load_player_data();
-
   // Load initial player locations from file
   std::vector<std::string> players_W, players_L;
   load_initial_players(players_W, players_L);
 
+  // Load player data from file
+  playerLibrary player_library = load_player_data();
+  std::vector<playerLibrary> PL(num_threads);
+  PL[0] = player_library;
+  for (int i = 1; i < num_threads; i++)
+    PL[i] = copy_player_library(player_library);
+
   // Setup the bracket
   Bracket* bracket = new Bracket(num_W, num_L);
-  bracket->set_player_library(players);
+  bracket->set_player_library(player_library);
   bracket->set_structure(wl_map);
   std::vector<Player*> players_in_bracket = bracket->set_initial_players(players_W, players_L);
   bracket->set_res_fixed(res_fixed_W, res_fixed_L, res_fixed_G);
