@@ -5,13 +5,46 @@ float q  = 5.75646273248511E-03;
 float qs = 3.31368631904900E-05;
 bool update_ratings = true;
 
+#ifdef _WIN32
+int get_console_color() {
+  CONSOLE_SCREEN_BUFFER_INFO info;
+  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
+  return info.wAttributes;
+}
+#endif
+
+void print_status_msg(int status, std::string msg) {
+#ifdef _WIN32
+  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+  int orig_color = get_console_color();
+  if (status == 0) {
+    SetConsoleTextAttribute(hConsole, (orig_color & ~0xF) + IRED);
+    std::cerr << "ERROR: ";
+  } else if (status == 1) {
+    SetConsoleTextAttribute(hConsole, (orig_color & ~0xF) + IYEL);
+    std::cerr << "WARNING: ";
+  } else {
+    std::cerr << "STATUS: ";
+  }
+  SetConsoleTextAttribute(hConsole, orig_color);
+  std::cerr << msg << std::endl;
+#else
+  if (status == 0)
+    std::cerr << BOLD(FRED("ERROR: ")) << msg << std::endl;
+  else if (status == 1)
+    std::cerr << BOLD(FYEL("WARNING: ")) << msg << std::endl;
+  else
+    std::cerr << BOLD("STATUS: ") << msg << std::endl;
+#endif
+}
+
 void throw_error(std::string msg) {
-  std::cerr << BOLD(FRED("ERROR: ")) << msg << std::endl;
+  print_status_msg(0, msg);
   exit(EXIT_FAILURE);
 }
 
 void throw_warning(std::string msg) {
-  std::cerr << BOLD(FYEL("WARNING: ")) << msg << std::endl;
+  print_status_msg(1, msg);
 }
 
 // Return a random float between 0 and 1
@@ -326,8 +359,8 @@ void Match::simulate() {
     x2 = 1. / (square(player_2->RD));
     y1 = qs * square(g2) * E1 * (1. - E1);  // 1/(d^2)
     y2 = qs * square(g1) * E2 * (1. - E2);  // 1/(d^2)
-    player_1->RD = std::max(30., sqrt(1. / (x1 + y1)));
-    player_2->RD = std::max(30., sqrt(1. / (x2 + y2)));
+    player_1->RD = (std::max)(30., sqrt(1. / (x1 + y1)));
+    player_2->RD = (std::max)(30., sqrt(1. / (x2 + y2)));
     player_1->rating += q * g2 * (s1 - E1) / (x1 + y1);
     player_2->rating += q * g1 * (s2 - E2) / (x2 + y2);
   }

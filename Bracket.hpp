@@ -22,15 +22,34 @@
 #define THREAD_NUM 0
 #endif
 
+// Windows
+#if defined _WIN32
+#include <windows.h>
+#endif
+
 // Output color and formatting
-#define RST "\x1B[0m"
-#define FRED(x) "\x1B[31m" x RST
-#define FYEL(x) "\x1B[33m" x RST
-#define BOLD(x) "\x1B[1m" x RST
+#if defined _WIN32
+#define IRED 12
+#define IYEL 14
+#elif defined __linux__
+#define RESET "\x1B[0m"
+#define FRED(x) "\x1B[31m" x RESET
+#define FYEL(x) "\x1B[33m" x RESET
+#define BOLD(x) "\x1B[1m" x RESET
+#else
+#define FRED(x) x
+#define FYEL(x) x
+#define BOLD(x) x
+#endif
 
 extern float pi, q, qs;
 extern bool update_ratings;
 
+#ifdef _WIN32
+int get_console_color();
+#endif
+
+void print_status_msg(int, std::string);
 void throw_error(std::string);
 void throw_warning(std::string);
 

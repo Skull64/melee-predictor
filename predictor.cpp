@@ -1,10 +1,8 @@
 #include <chrono>
 
-#if defined __linux__
+#ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
-#elif defined _WIN32
-#include <windows.h>
 #endif
 
 #include "Bracket.hpp"
@@ -64,15 +62,15 @@ int main(int argc, char** argv) {
   int j = 0;
   int pbarWidth, pos_prev, pct_prev;
   {
-#if defined __linux__
-    struct winsize console_size;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &console_size);
-    pbarWidth = console_size.ws_col - 8;
-#elif defined _WIN32
+#if defined _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     pbarWidth = columns - 8;
+#elif defined __linux__
+    struct winsize console_size;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &console_size);
+    pbarWidth = console_size.ws_col - 8;
 #else
     pbarWidth = 100;
 #endif
