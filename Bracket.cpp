@@ -80,6 +80,22 @@ int int_power(int x, int n) {
   return x * y;
 }
 
+// Get the ordinal of a number
+std::string get_ordinal(int a) {
+  assert(a > 0);
+  std::string suffix;
+  int last_digit = a % 10;
+  if (last_digit == 1)
+    suffix = "st";
+  else if (last_digit == 2)
+    suffix = "nd";
+  else if (last_digit == 3)
+    suffix = "rd";
+  else
+    suffix = "th";
+  return std::to_string(a) + suffix;
+}
+
 // Open a file
 std::ifstream open_file(std::string fname) {
   std::ifstream infile(fname);
@@ -204,7 +220,7 @@ void Player::update_orig_rating() {
 void Player::calc_avg_points() {
   int t = 0;
   float p = 100.;
-  for (int i = 0; i < 12; i++) {
+  for (int i = 0; i < placings.size(); i++) {
     avg_points += placings[i] * p;
     t += placings[i];
     p *= 0.75;
@@ -406,32 +422,14 @@ Round::Round(char sid, int rid) {
       num_matches = 1;
     else
       num_matches = int_power(2, round_id / 2 - 2);
-    if (round_id ==  0)
-      name = "1st Place";
-    else if (round_id ==  1)
-      name = "2nd Place";
-    else if (round_id ==  2)
-      name = "3rd Place";
-    else if (round_id ==  3)
-      name = "4th Place";
-    else if (round_id ==  4)
-      name = "5th-6th Place";
-    else if (round_id ==  5)
-      name = "7th-8th Place";
-    else if (round_id ==  6)
-      name = "9th-12th Place";
-    else if (round_id ==  7)
-      name = "13th-16th Place";
-    else if (round_id ==  8)
-      name = "17th-24th Place";
-    else if (round_id ==  9)
-      name = "25th-32nd Place";
-    else if (round_id == 10)
-      name = "33rd-48th Place";
-    else if (round_id == 11)
-      name = "49th-64th Place";
-    else
-      name = "";
+    int placing;
+    if (round_id < 2) {
+      placing = round_id + 1;
+    } else {
+      placing = int_power(2, round_id / 2);
+      placing += (round_id & 1) * (placing / 2) + 1;
+    }
+    name = get_ordinal(placing) + " Place";
   }
 
   // Create match objects
@@ -603,7 +601,7 @@ void Bracket::update_player_results() {
     placings[i]->matches[0]->player_1->placings[i] += 1;
   }
   // 5th place and on: multiple players each
-  for (int i = 4; i < 12; i++) {
+  for (int i = 4; i < num_rounds_P; i++) {
     for (std::vector<Match*>::iterator it = placings[i]->matches.begin();
          it != placings[i]->matches.end(); it++) {
       (*it)->player_1->placings[i] += 1;

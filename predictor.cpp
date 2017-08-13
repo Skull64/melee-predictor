@@ -11,8 +11,8 @@ int main(int argc, char** argv) {
   // OpenMP setup
   int num_threads;
 #ifdef _OPENMP
-#pragma omp parallel
-#pragma omp single
+  #pragma omp parallel
+  #pragma omp single
   num_threads = omp_get_num_threads();
 #else
   num_threads = 1;
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 
   // Simulate the bracket n times
   start = std::chrono::high_resolution_clock::now();
-#pragma omp parallel for schedule(guided)
+  #pragma omp parallel for schedule(guided)
   for (int i = 0; i < n; i++) {
     int t = THREAD_NUM;
     brackets[t]->simulate();
@@ -121,14 +121,25 @@ int main(int argc, char** argv) {
   }
 
   // Print results
+  num_placings = brackets[0]->num_rounds_P;
   std::sort(players_in_bracket.begin(), players_in_bracket.end(), by_avg_points());
-  printf("  %-16s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s\n", "", "Points",
-         "1st", "2nd", "3rd", "4th", "5th", "7th",
-         "9th", "13th", "17th", "25th", "33rd", "49th");
+  printf("  %-16s%9s", "Name", "Points");
+  for (int i = 0; i < num_placings; i++) {
+    int placing;
+    if (i < 2) {
+      placing = i + 1;
+    } else {
+      placing = int_power(2, i / 2);
+      placing += (i & 1) * (placing / 2) + 1;
+    }
+    printf("%9s", get_ordinal(placing).c_str());
+  }
+  printf("\n");
+  printf("  %s\n", std::string(25 + 9 * num_placings, '-').c_str());
   for (std::vector<Player*>::iterator it = players_in_bracket.begin();
        it != players_in_bracket.end(); it++) {
     printf("  %-16s  %7.2f", (*it)->name.c_str(), (*it)->avg_points);
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < num_placings; i++) {
       printf("  %7u", (*it)->placings[i]);
     }
     printf("\n");

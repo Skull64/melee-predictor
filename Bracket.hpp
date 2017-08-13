@@ -54,8 +54,9 @@ void throw_error(std::string);
 void throw_warning(std::string);
 
 float rand_float();
-float square();
-int int_power();
+float square(float);
+int int_power(int, int);
+std::string get_ordinal(int);
 
 std::ifstream open_file(std::string);
 
