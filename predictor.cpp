@@ -66,11 +66,11 @@ int main(int argc, char** argv) {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    pbarWidth = columns - 8;
+    pbarWidth = columns - 9;
 #elif defined __linux__
     struct winsize console_size;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &console_size);
-    pbarWidth = console_size.ws_col - 8;
+    pbarWidth = console_size.ws_col - 9;
 #else
     pbarWidth = 100;
 #endif
@@ -96,14 +96,15 @@ int main(int argc, char** argv) {
         pos_prev = pos;
         pct_prev = pct;
         std::cout << "[" << std::string(pos, '=') << ">" <<
-                  std::string(pbarWidth - pos - 1, ' ') << "] " << pct << "%\r";
+                  std::string(pbarWidth - pos, ' ') << "] " <<
+                  std::setw(3) << pct << "%\r";
         std::cout.flush();
       }
     }
 #endif
   }
 #ifdef PROGRESS_BAR
-  std::cout << "[" << std::string(pbarWidth, '=') << "] 100%" << std::endl;
+  std::cout << "[" << std::string(pbarWidth + 1, '=') << "] 100%" << std::endl;
   std::cout << std::endl;
 #endif
   end = std::chrono::high_resolution_clock::now();
