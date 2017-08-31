@@ -138,6 +138,7 @@ class Round {
 
 class Bracket {
  public:
+  int num_W, num_L;
   playerLibrary player_library;
   int num_rounds_W, num_rounds_L, num_rounds_G, num_rounds_P;
   std::vector<Player*> players_in_bracket;

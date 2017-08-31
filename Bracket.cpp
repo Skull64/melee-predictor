@@ -144,11 +144,11 @@ void load_bracket_params(int& num_W, int& num_L,
   // Make sure num_L = num_W
   try {
     num_L = std::stoi(buffer);
-    if (num_L != num_W)
+    if ((num_L != num_W) && (num_L != 0))
       throw 1;
   } catch (...) {
     throw_error("Number of players in losers bracket = " + buffer +
-                ", must be be the same as the number of players in winners bracket");
+                ", must be be either the same as the number of players in winners bracket or zero");
   }
   std::getline(infile, buffer);
 
@@ -453,7 +453,10 @@ void Round::simulate() {
 }
 
 // Bracket object constructor
-Bracket::Bracket(int num_W, int num_L) {
+Bracket::Bracket(int numw, int numl) {
+  num_W = numw;
+  num_L = numl;
+
   // Number of rounds
   num_rounds_W = ((int) ceil(log2(num_W)));  // Winners bracket
   if (num_L == 0)
@@ -495,8 +498,14 @@ void Bracket::set_structure(std::vector<std::vector<int>> wl_map) {
   // Other winners bracket
   for (int rid = 1; rid < num_rounds_W; rid++)
     for (int i = 0; i < winners[rid]->num_matches; i++)
-      winners[rid]->matches[i]->set_structure(winners[rid - 1]->matches[i / 2], i % 2,
-                                              losers[rid * 2]->matches[wl_map[rid - 1][i]], 0);
+      // Structure of first round of winners bracket is treated differently if no
+      // players begin in losers bracket
+      if (rid == num_rounds_W - 1 && num_L == 0)
+        winners[rid]->matches[i]->set_structure(winners[rid - 1]->matches[i / 2], i % 2,
+                                                losers[rid * 2 - 1]->matches[wl_map[rid - 1][i]], i % 2);
+      else
+        winners[rid]->matches[i]->set_structure(winners[rid - 1]->matches[i / 2], i % 2,
+                                                losers[rid * 2]->matches[wl_map[rid - 1][i]], 0);
 
   // Losers finals
   losers[0]->matches[0]->set_structure(grands[1]->matches[0], 1,
