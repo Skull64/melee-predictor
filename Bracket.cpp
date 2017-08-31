@@ -85,14 +85,18 @@ std::string get_ordinal(int a) {
   assert(a > 0);
   std::string suffix;
   int last_digit = a % 10;
-  if (last_digit == 1)
-    suffix = "st";
-  else if (last_digit == 2)
-    suffix = "nd";
-  else if (last_digit == 3)
-    suffix = "rd";
-  else
+  int second_last_digit = (a / 10) % 10;
+  if (second_last_digit == 1)
     suffix = "th";
+  else
+    if (last_digit == 1)
+      suffix = "st";
+    else if (last_digit == 2)
+      suffix = "nd";
+    else if (last_digit == 3)
+      suffix = "rd";
+    else
+      suffix = "th";
   return std::to_string(a) + suffix;
 }
 
